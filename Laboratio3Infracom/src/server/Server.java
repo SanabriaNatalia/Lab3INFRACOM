@@ -7,6 +7,7 @@ public class Server {
 
 	private ServerSocket serverSocket;
 	private int portNumber;
+	
 	Server(int portNumber) 
 	{
 		this.portNumber=portNumber;
@@ -21,6 +22,7 @@ public class Server {
 			System.exit(0); 
 		}
 	}
+	
 	private void startListening() 
 	{
 		try
@@ -39,6 +41,7 @@ public class Server {
 			System.out.println(e); 
 		}
 	}
+	
 	public static void main(String data[]) 
 	{
 		int portNumber=Integer.parseInt(data[0]);
