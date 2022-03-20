@@ -88,7 +88,7 @@ def main():
         else :
             print("Error en la verificación de los hash")
         
-        os.rename(file_path, new_path)
+        os.replace(file_path, new_path)
         
         """
         data = input("> ")
