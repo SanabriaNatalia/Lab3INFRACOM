@@ -23,6 +23,10 @@ Infraestructura de Comunicaciones
 
 `python3 server.py`
 
+4. Seguir las instrucciones en pantalla
+
+* El servidor solicitará declarar el tamaño del archivo y el número de conexiones que se usarán en la prueba.
+
 ### Cliente
 
 1. Ingresar a la carpeta de este repositorio en la máquina del cliente.
