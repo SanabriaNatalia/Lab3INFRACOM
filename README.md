@@ -23,3 +23,9 @@ Infraestructura de Comunicaciones
 
 `python3 server.py`
 
+### Cliente
+
+1. Ingresar a la carpeta de este repositorio en la máquina del cliente.
+2. Correr el cliente (el servidor debe estar aceptando conexiones)
+
+`python3 client.py`
