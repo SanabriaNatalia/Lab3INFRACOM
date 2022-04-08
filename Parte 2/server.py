@@ -106,17 +106,11 @@ def main():
 # Métodos auxiliares
 # -----------------------------------------------------
 
-# Entrega el valor de hash
-def getHash(path):
-    hash = sha256()
-    with open(path, "rb") as f:
-        while True:
-            bloque = f.read(4096)
-            if not bloque:
-                break
-            hash.update(bloque)
-    f.close()
-    return hash.hexdigest()
+# Creacio archivo 
+def crearArchivo(path, tam):
+    with open(path, "wb") as f:
+        f.seek(tam * 1024 ** 2)
+        f.write("Infracom".encode())
 
 # Escribe el log del servidor
 def writeLog(addr, fsize, time, fname, client_id):
