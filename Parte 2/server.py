@@ -11,10 +11,9 @@
 
 import os
 import socket
-import threading
 import time
-from hashlib import sha256
 from threading import Thread
+from hashlib import sha256
 from datetime import datetime
 
 threads = []
@@ -106,7 +105,7 @@ def main():
 # Métodos auxiliares
 # -----------------------------------------------------
 
-# Creacio archivo 
+# Creacio archivo
 def crearArchivo(path, tam):
     with open(path, "wb") as f:
         f.seek(tam * 1024 ** 2)
