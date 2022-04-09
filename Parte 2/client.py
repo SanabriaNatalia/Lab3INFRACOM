@@ -12,122 +12,108 @@
 import os
 import socket
 import time
+import os
+import threading
+from datetime import datetime
+import time
 from hashlib import sha256
 
 
 IP = socket.gethostbyname(socket.gethostname());
 PORT = 4466
-ADDR = (IP, PORT)
 SIZE = 1024
 FORMAT = "utf-8"
 RECEIVED_DATA_PATH = "ArchivosRecibidos"
 
-def main():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.connect(ADDR)
-    
-    while True:
-        data = server.recv(SIZE).decode(FORMAT)
-        cmd, msg = data.split("@")
-        
-        if cmd == "OK":
-            print(f"{msg}")
-        elif cmd == "DISCONNECTED":
-            print(f"{msg}")
-            break
-        
-        # Received file details.
-        file_path = server.recv(SIZE).decode(FORMAT)
-        file_size = server.recv(SIZE).decode(FORMAT)
-        file_hash = server.recv(SIZE).decode(FORMAT)
-        data = server.recv(SIZE).decode(FORMAT)
-        
-        file_name = file_path.split("/")[-1]
-        
-        data = data.split("@")
-        client_id = data[0]
-        cons = data[-1]
-        
-        print(f"File name: {file_name} \n")
-        print(f"File size: {file_size} \n")
+clients = int(input('how many clients? '))
+while (clients <= 0 and clients>25 ):
+    clients = int(input('Invalid number '))
 
-        
-        if not os.path.isdir("./ArchivosRecibidos"):
-            os.mkdir("./ArchivosRecibidos")
-        
-        print("[RECEIVING] Receiving file")
-        # Opening and reading file.
-        with open("./ArchivosRecibidos/" + file_name, "wb") as file:
-            c = 0
-            # Starting the time capture.
-            start_time = time.time()
+class Main:
+    def __init__(self):
+        self.lock = threading.Lock()
+    def funct(self, name):
+        self.lock.acquire()
+        log = open("./logs/"+name+' '+datetime.today().strftime('%Y-%m-%d-%H-%M-%S')+"log.txt", "w")
+        self.lock.release()
+        server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        ADDR = ('localhost', 4466)
+        print('connecting to %s port %s' % ADDR)
+        server.connect(ADDR)
+        file = open("./ArchivosRecibidos/" + name + "-prueba-" + str(clients) + ".txt", "w")
 
-            # Running the loop while file is recieved.
-            while c <= int(file_size):
-                data = server.recv(1024)
-                if not (data):
-                    break
-                file.write(data)
-                c += len(data)
+        try:
+            self.lock.acquire()
+            mensaje = b'Iniciar conexion...'
+            print('enviando "%s"' % mensaje)
+            server.sendto(mensaje,ADDR)
 
-            # Ending the time capture.
-            end_time = time.time()
+            check, ADDR = server.recvfrom(32)
+            if (check.decode('utf-8') == "ok"):
+                print('servidor mando ok')
+                server.sendto(b'Cual es el nombre del archivo?', ADDR)
+                N, server_addr = server.recvfrom(32)
+                file_name = N.decode('utf-8')
+                log.write('El nombre es: ' + file_name + '\n')
+                server.sendto(b'listo', ADDR)
 
-        print("File transfer Complete.Total time: ", end_time - start_time)
-        
-        file_path = "./" + RECEIVED_DATA_PATH + "/" + file_name
-        new_path = "./" + RECEIVED_DATA_PATH + "/Cliente" + client_id+"-Prueba-"+cons+".txt"
-        
-        client_hash = getHash(file_path)
-        match = client_hash == file_hash
-        
-        print(f"Received hash: {file_hash}")
-        print(f"Calculated hash: {client_hash}")
-        
-        if match:
-            print("Los hash de los archivos son consistentes")
-        else :
-            print("Error en la verificación de los hash")
-        
-        os.replace(file_path, new_path)
-        
-        """
-        data = input("> ")
-        data = data.split(" ")
-        cmd = data[0]
-        
-        if cmd == "LOGOUT":
-            server.send(cmd.encode(FORMAT))
-            break
-        """
-        break
-    
-    print("Disconnected from the server.")
-    server.close()        
-            
-    
-# -----------------------------------------------------
-# Métodos auxiliares
-# -----------------------------------------------------
+                num_paq = 0
+                start_time = time.time()
+                err = False
+                while (True):
+                    data, server_addr = server.recvfrom(1024)
 
-def getHash(path):
-    hash = sha256()
-    with open(path, "rb") as f:
-        while True:
-            bloque = f.read(SIZE)
-            if not bloque:
-                break
-            hash.update(bloque)
-    f.close()
-    return hash.hexdigest()
+                    if data:
+                        try:
+                            file.write(data.decode('utf-8') + os.linesep)
+                            # md5.update(data)
+                            num_paq += 1
 
-# Escribe el log del cliente
-def writeLog(path, ip, port, fsize, tiempo):
+                        except:
+                            err = True
+                            print('Ocurrio un error')
+                            server.sendto(b'Hubo un error al recibir el archivo', server_addr)
+                            break
 
-    if not os.path.isdir("./logs"):
-        os.mkdir("./logs")
-    
+                    else:
+                        print('Final de lectura del archivo')
+                        server.sendto(b'Archivo recibido', server_addr)
+                        break
+                end_time = time.time()
+                file_size = os.path.getsize("./archivosRecibidos/" + name + "-prueba-" + str(clients) + ".txt")
 
-""" Main """
-if __name__ == "__main__":
-    main()
+                file.close()
+                log.write('El nombre del cliente es: ' + name + '\n')
+                log.write('El tamaño del archivo es: ' + str(file_size / 1000000) + ' MB' + '\n')
+
+                # print("Hash del archivo leido: {0}".format(md5.hexdigest()))
+                if err == False:
+                    print("Archivo leido")
+                    log.write('Entrega del archivo' + '\n')
+                else:
+                    log.write('Error entrega archivo' + '\n')
+
+                log.write('Tiempo de transferencia: ' + str(end_time - start_time) + ' segs' + '\n')
+                log.write('Valor total en bytes recibidos: ' + str(file_size) + '\n')
+                log.write('Cantidad de paquetes recibidos: ' + str(num_paq) + '\n')
+
+        finally:
+
+            print('Cerrar socket')
+
+            self.lock.release()
+            print('Fin del programa')
+            log.close()
+        server.close()
+
+def t(c, nombre):
+    c.funct(nombre)
+
+
+hilo = Main()
+for clients in range(clients):
+    client = threading.Thread(name="Cliente%s" % (clients + 1),
+                               target=t,
+                               args=(hilo, "Cliente%s" % (clients + 1))
+                               )
+    client.start()
