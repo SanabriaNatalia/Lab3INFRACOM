@@ -11,12 +11,12 @@ path = "archivosServidor/"
 if not os.path.isdir(path):
     os.mkdir(path)
 
-path = "server_data/dummy100.txt"
+path = "dummy100.txt"
 with open(path, "wb") as f:
     f.seek(100*1024**2)
     f.write("Infracom".encode())
     
-path = "server_data/dummy250.txt"
+path = "dummy250.txt"
 with open(path, "wb") as f:
     f.seek(250*1024**2)
     f.write("Infracom".encode())
