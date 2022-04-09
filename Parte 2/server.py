@@ -18,7 +18,7 @@ from datetime import datetime
 
 threads = []
 
-IP = socket.gethostbyname(socket.gethostname());
+IP = "localhost"
 PORT = 4466
 ADDR = (IP, PORT)
 SIZE = 1024
@@ -63,32 +63,30 @@ def handle_client(conn, addr, path,client_id, cons):
 
 def main():
     print("[STARTING] Server is starting...")
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind(ADDR)
-    server.listen()
     print("[LISTENING] Server is listening")
     
-    print("Inserte el número de conexiones que recibirá el servidor")
+    print("Inserte el número de conexiones del servidor")
     cons = input("> ")
     
     print("Archivo tipo 1: 100 MB")
     print("Archivo tipo 2: 250 MB")
-    arch = input("[/] Seleccione el tipo de archivo a enviar: (1 o 2)\n")
+    arch = input("[/] Seleccione el tipo de archivo: (1 o 2)\n")
     
     # Filepath
     path = SERVER_DATA_PATH
-    
     if(arch == "1"):
-        path += "/dummy100.txt"
+        path += "/100.txt"
     elif arch == "2":
-        path += "/dummy250.txt"
+        path += "/250.txt"
         
     client_id = 0
     
     while True:
-        id_client = 1;
+        id_client = 1
         while True:
-            data, addr = server.recvfrom(4096)  # Mensaje de listo del cliente y el ip con el estado
+            data, addr = server.recvfrom(4096)
             print(f"Cliente numero: {id_client} {data.decode()}")
             thread = Thread(target=handle_client, args=(server, addr, path, cons, id_client))
 

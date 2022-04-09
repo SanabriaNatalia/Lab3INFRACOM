@@ -19,11 +19,11 @@ import time
 from hashlib import sha256
 
 
-IP = socket.gethostbyname(socket.gethostname());
+IP = "localhost"
 PORT = 4466
 SIZE = 1024
 FORMAT = "utf-8"
-RECEIVED_DATA_PATH = "ArchivosRecibidos"
+RECEIVED_DATA_PATH = "Recibidos"
 
 clients = int(input('how many clients? '))
 while (clients <= 0 and clients>25 ):
@@ -40,7 +40,7 @@ class Main:
         ADDR = ('localhost', 4466)
         print('connecting to %s port %s' % ADDR)
         server.connect(ADDR)
-        file = open("./ArchivosRecibidos/" + name + "-prueba-" + str(clients) + ".txt", "w")
+        file = open("./Recibidos/" + name + "-prueba-" + str(clients) + ".txt", "w")
 
         try:
             self.lock.acquire()
@@ -80,13 +80,11 @@ class Main:
                         server.sendto(b'Archivo recibido', server_addr)
                         break
                 end_time = time.time()
-                file_size = os.path.getsize("./archivosRecibidos/" + name + "-prueba-" + str(clients) + ".txt")
+                file_size = os.path.getsize("./Recibidos/" + name + "-prueba-" + str(clients) + ".txt")
 
                 file.close()
                 log.write('El nombre del cliente es: ' + name + '\n')
                 log.write('El tamaño del archivo es: ' + str(file_size / 1000000) + ' MB' + '\n')
-
-                # print("Hash del archivo leido: {0}".format(md5.hexdigest()))
                 if err == False:
                     print("Archivo leido")
                     log.write('Entrega del archivo' + '\n')
